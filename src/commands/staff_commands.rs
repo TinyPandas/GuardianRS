@@ -7,6 +7,7 @@ use serenity::framework::standard::{
 };
 
 #[command]
+#[allowed_roles("staff")]
 fn shutdown(ctx: &mut Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read();
 
