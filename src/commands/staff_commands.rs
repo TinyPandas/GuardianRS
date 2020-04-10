@@ -7,8 +7,7 @@ use serenity::framework::standard::{
 };
 
 #[command]
-#[allowed_roles("staff")]
-fn quit(ctx: &mut Context, msg: &Message) -> CommandResult {
+fn shutdown(ctx: &mut Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read();
 
     if let Some(manager) = data.get::<ShardManagerContainer>() {

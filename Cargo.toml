@@ -1,5 +1,5 @@
 [package]
-name = "GuardianRS"
+name = "guardian_rs"
 version = "0.1.0"
 authors = ["TSP_Panda <chris.barwick16@gmail.com>"]
 edition = "2018"
@@ -10,16 +10,5 @@ kankyo = "0.2"
 log = "0.4"
 
 [dependencies.serenity]
-default-features = false
-features = [
-    "builder",
-    "client",
-    "framework",
-    "gateway",
-    "http",
-    "model",
-    "standard_framework",
-    "utils",
-    "rustls_backend",
-]
+features = ["cache", "framework", "standard_framework", "rustls_backend"]
 version = "0.8"

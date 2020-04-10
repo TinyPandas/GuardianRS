@@ -1,21 +1,22 @@
 mod commands;
 
-use std::{collections::HashSet, env, sync::Arc, }
+use std::{collections::HashSet, env, sync::Arc, };
 use serenity::{
-    client::bridge::gateway::ShardManager,
-    framework::{
-        StandardFramework,
-        standard::macros::group,
+    client::bridge::gateway::{ShardManager},
+    framework::standard::{
+        Args, CommandResult, CommandGroup,
+        HelpOptions, help_commands, StandardFramework,
+        macros::{group, help, },
     },
-    model::{
-        event::ResumedEvent,
-        gateway::Ready,
-    },
+    model::{channel::{Message}, gateway::Ready, id::UserId, event::ResumedEvent},
     prelude::*,
 };
 use log::{error, info};
 
-use commands::{};
+use commands::{
+    member_commands::*,
+    staff_commands::*,
+};
 
 struct ShardManagerContainer;
 
@@ -36,12 +37,12 @@ impl EventHandler for Handler {
 }
 
 #[group]
-#[commands(help)]
+#[commands(ping)]
 struct General;
 
 #[group]
-#[allowed-roles("staff")]
-#[commnads(quit)]
+#[allowed_roles("staff")]
+#[commands(shutdown)]
 struct Admin;
 
 // The framework provides two built-in help commands for you to use.
@@ -118,9 +119,9 @@ fn main() {
         .configure(|c| c
             .owners(owners)
             .prefix(";"))
-        .help(&HELP)
-        .group(&GENERAL_GROUP))
-        .group(&ADMIN_GROUP);
+        .help(&MY_HELP)
+        .group(&GENERAL_GROUP)
+        .group(&ADMIN_GROUP));
 
     if let Err(why) = client.start() {
         error!("Client error: {:?}", why);
