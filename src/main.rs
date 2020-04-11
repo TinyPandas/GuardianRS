@@ -2,7 +2,7 @@ mod commands;
 
 use log::{error, info};
 use serenity::{
-    client::bridge::gateway::ShardManager,
+    client::bridge::gateway::{ShardManager},
     framework::standard::{
         help_commands,
         macros::{group, help},
@@ -74,7 +74,7 @@ impl EventHandler for Handler {
 }
 
 #[group]
-#[commands(ping)]
+#[commands(ping, info, invite, nocode)]
 struct General;
 
 #[group]
