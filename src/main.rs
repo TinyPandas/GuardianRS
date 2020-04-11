@@ -1,22 +1,24 @@
 mod commands;
 
-use std::{collections::HashSet, env, sync::Arc, };
+use log::{error, info};
 use serenity::{
-    client::bridge::gateway::{ShardManager},
+    client::bridge::gateway::ShardManager,
     framework::standard::{
-        Args, CommandResult, CommandGroup,
-        HelpOptions, help_commands, StandardFramework,
-        macros::{group, help, },
+        help_commands,
+        macros::{group, help},
+        Args, CommandGroup, CommandResult, HelpOptions, StandardFramework,
     },
-    model::{channel::{Message}, gateway::Ready, id::UserId, event::ResumedEvent},
+    model::{
+        channel::{ReactionType, Message, Attachment},
+        event::ResumedEvent,
+        gateway::Ready,
+        id::{UserId, EmojiId},
+    },
     prelude::*,
 };
-use log::{error, info};
+use std::{collections::HashSet, env, sync::Arc};
 
-use commands::{
-    member_commands::*,
-    staff_commands::*,
-};
+use commands::{member_commands::*, staff_commands::*};
 
 struct ShardManagerContainer;
 
@@ -26,7 +28,42 @@ impl TypeMapKey for ShardManagerContainer {
 
 struct Handler;
 
+fn add_reaction(ctx: &Context, msg: &Message, is_animated: bool, emoji_id: u64, emoji_name: &str) {
+    match &msg.react(&ctx.http, ReactionType::Custom {animated: is_animated, id: EmojiId::from(emoji_id), name: Some(String::from(emoji_name))}) {
+        Ok(()) => {},
+        Err(why) => {
+            println!("Failed to add reaction to message. {:?}", why);
+        },
+    }
+}
+
 impl EventHandler for Handler {
+    fn message(&self, ctx: Context, msg: Message) {
+        let name: String = msg.channel_id.name(&ctx).unwrap();
+
+        match name.as_str() {
+            "showcase" => {
+                let items: Vec<Attachment> = msg.attachments.clone();
+
+                if items.len() == 0 {
+                    match msg.delete(ctx.http) {
+                        Ok(()) => {},
+                        Err(why) => {
+                            println!("Missing permission to delete messages. {:?}", why);
+                        },
+                    }
+                };
+            },
+            "suggestion-box" => {
+                if msg.content.starts_with("--sug--") {
+                    add_reaction(&ctx, &msg, false, 693278870681419867, "upvote");
+                    add_reaction(&ctx, &msg, false, 693278893121208391, "downvote");
+                }
+            },
+            _ => {}
+        }
+    }
+
     fn ready(&self, _: Context, ready: Ready) {
         info!("Connected as {}", ready.user.name);
     }
@@ -51,8 +88,7 @@ struct Admin;
 #[help]
 // This replaces the information that a user can pass
 // a command-name as argument to gain specific information about it.
-#[individual_command_tip =
-"Hello! \n\
+#[individual_command_tip = "Hello! \n\
 If you want more information about a specific command, just pass the command as argument."]
 // Some arguments require a `{}` in order to replace it with contextual information.
 // In this case our `{}` refers to a command's name.
@@ -79,13 +115,13 @@ If you want more information about a specific command, just pass the command as 
 // `strikethrough_commands_tip(Some(""))` keeps `Some()` wrapping an empty `String`, which is the default value.
 // If the `String` is not empty, your given `String` will be used instead.
 // If you pass in a `None`, no hint will be displayed at all.
-fn my_help (
+fn my_help(
     context: &mut Context,
     msg: &Message,
     args: Args,
     help_options: &'static HelpOptions,
     groups: &[&'static CommandGroup],
-    owners: HashSet<UserId>
+    owners: HashSet<UserId>,
 ) -> CommandResult {
     help_commands::with_embeds(context, msg, args, help_options, groups, owners)
 }
@@ -111,17 +147,17 @@ fn main() {
             set.insert(info.owner.id);
 
             set
-        },
+        }
         Err(why) => panic!("Couldn't get application info: {:?}", why),
     };
 
-    client.with_framework(StandardFramework::new()
-        .configure(|c| c
-            .owners(owners)
-            .prefix(";"))
-        .help(&MY_HELP)
-        .group(&GENERAL_GROUP)
-        .group(&ADMIN_GROUP));
+    client.with_framework(
+        StandardFramework::new()
+            .configure(|c| c.owners(owners).prefix(";"))
+            .help(&MY_HELP)
+            .group(&GENERAL_GROUP)
+            .group(&ADMIN_GROUP),
+    );
 
     if let Err(why) = client.start() {
         error!("Client error: {:?}", why);
