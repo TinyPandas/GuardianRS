@@ -1,8 +1,9 @@
 mod commands;
+pub mod lib;
+pub mod util;
 
 use log::{error, info};
 use serenity::{
-    client::bridge::gateway::{ShardManager},
     framework::standard::{
         help_commands,
         macros::{group, help},
@@ -19,12 +20,7 @@ use serenity::{
 use std::{collections::HashSet, env, sync::Arc};
 
 use commands::{member_commands::*, staff_commands::*};
-
-struct ShardManagerContainer;
-
-impl TypeMapKey for ShardManagerContainer {
-    type Value = Arc<Mutex<ShardManager>>;
-}
+use lib::ShardManagerContainer;
 
 struct Handler;
 
@@ -74,7 +70,7 @@ impl EventHandler for Handler {
 }
 
 #[group]
-#[commands(ping, info, invite, nocode)]
+#[commands(ping, info, invite, nocode, request)]
 struct General;
 
 #[group]
