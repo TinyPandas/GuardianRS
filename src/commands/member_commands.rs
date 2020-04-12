@@ -71,9 +71,30 @@ fn nocode(ctx: &mut Context, msg: &Message) -> CommandResult {
 }
 
 #[command]
+fn status(ctx: &mut Context, msg: &Message) -> CommandResult {
+    let guild = get_guild_from_message(&msg);
+    if guild.is_none() {
+        let _ = msg.reply(&ctx, "Failed to get your status.");
+        return Ok(());
+    }
+    let guild = guild.unwrap();
+
+    let user_id = msg.author.id;
+    let indiv_status = get_member_online_status(ctx, guild, user_id);
+    if indiv_status.is_none() {
+        let _ = msg.reply(&ctx, "Failed to get your status.");
+    }
+    let indiv_status = indiv_status.unwrap();
+
+    let _ = msg.reply(&ctx, &format!("Your online status is: {}", indiv_status.name()));
+
+    Ok(())
+}
+
+#[command]
 fn request(ctx: &mut Context, msg: &Message) -> CommandResult {
     //get reason for request
-    let reason = &msg.content[9..msg.content.len()];
+    let reason = &msg.content[9..];
     
     //get guild
     let guild = get_guild_from_message(&msg);
@@ -84,14 +105,14 @@ fn request(ctx: &mut Context, msg: &Message) -> CommandResult {
     let guild = guild.unwrap();
 
     //get channel to post in
-    let channel = get_channel_from_guild_by_name(ctx, &guild, String::from("commands"));
+    let channel = get_channel_from_guild_by_name(ctx, guild, String::from("commands"));
     if channel.is_none() {
         let _ = msg.reply(&ctx, "Failed to mention staff.");
         return Ok(());
     }
     let channel = channel.unwrap();
 
-    let online_staff = get_members_by_role(ctx, &guild, String::from("staff"));
+    let online_staff = get_members_by_role(ctx, guild, String::from("staff"));
     if online_staff.is_none() {
         let _ = msg.reply(&ctx, "Failed to mention staff.");
         return Ok(());

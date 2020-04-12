@@ -70,7 +70,7 @@ impl EventHandler for Handler {
 }
 
 #[group]
-#[commands(ping, info, invite, nocode, request)]
+#[commands(ping, info, invite, nocode, request, status)]
 struct General;
 
 #[group]
