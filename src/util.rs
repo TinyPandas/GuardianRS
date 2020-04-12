@@ -9,7 +9,7 @@ use serenity::{
 
 pub struct Util;
 
-pub fn get_guild_from_message(ctx: &mut Context, msg: &Message) -> Option<GuildId> {
+pub fn get_guild_from_message(msg: &Message) -> Option<GuildId> {
     match msg.guild_id {
         Some(guid) => {
             Some(guid)
@@ -30,7 +30,7 @@ pub fn get_channel_from_guild_by_name(ctx: &mut Context, guid: &GuildId, channel
     }
 }
 
-pub fn member_has_role(ctx: &mut Context, member: Member, role_name: String) -> bool {
+pub fn member_has_role(ctx: &Context, member: &Member, role_name: &String) -> bool {
     match member.roles(&ctx) {
         Some(roles) => {
             for role in roles {
@@ -44,29 +44,24 @@ pub fn member_has_role(ctx: &mut Context, member: Member, role_name: String) -> 
             return false;
         }
     }
-
-    return false
 }
 
-pub fn get_staff_members(ctx: &mut Context, guid: &GuildId) -> Result<Vec<Member>> {
-    let online_staff = Vec::new();
+pub fn get_members_by_role(ctx: &Context, guid: &GuildId, role_name: String) -> Option<Vec<Member>> {
+    let mut members = Vec::new();
 
-    for member_result in guid.members_iter(&ctx) {
+    for member_result in guid.members_iter(ctx) {
         match member_result {
             Ok(member) => {
-                if (member_has_role(ctx, member, "staff".to_string())) {
-                    
+                if member_has_role(&ctx, &member, &role_name) {
+                    // check if member is only.
+                    members.insert(members.len(), member.clone());
                 }
-            }, Err(why) => {
-
+            }, Err(_why) => {
+                println!("Errer getting members for role {}.", role_name);
+                return None;
             }
         }
     }
 
-    return online_staff;
-}
-
-pub fn get_user_from_member(ctx: &mut Context, member: Member) -> Result<User> {
-    let uid: UserId = member.user_id();
-    return uid.to_user(&ctx);
+    return Some(members);
 }

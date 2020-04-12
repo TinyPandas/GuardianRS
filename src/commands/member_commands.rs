@@ -73,10 +73,10 @@ fn nocode(ctx: &mut Context, msg: &Message) -> CommandResult {
 #[command]
 fn request(ctx: &mut Context, msg: &Message) -> CommandResult {
     //get reason for request
-    let reason = &msg.content;
+    let reason = &msg.content[9..msg.content.len()];
     
     //get guild
-    let guild = get_guild_from_message(ctx, msg);
+    let guild = get_guild_from_message(&msg);
     if guild.is_none() {
         let _ = msg.reply(&ctx, "Failed to mention staff.");
         return Ok(());
@@ -84,21 +84,32 @@ fn request(ctx: &mut Context, msg: &Message) -> CommandResult {
     let guild = guild.unwrap();
 
     //get channel to post in
-    let channel = get_channel_from_guild_by_name(ctx, guild, String::from("commands"));
+    let channel = get_channel_from_guild_by_name(ctx, &guild, String::from("commands"));
     if channel.is_none() {
         let _ = msg.reply(&ctx, "Failed to mention staff.");
         return Ok(());
     }
     let channel = channel.unwrap();
 
-    let _ = channel.say(&ctx, &reason);
+    let online_staff = get_members_by_role(ctx, &guild, String::from("staff"));
+    if online_staff.is_none() {
+        let _ = msg.reply(&ctx, "Failed to mention staff.");
+        return Ok(());
+    }
+    let online_staff = online_staff.unwrap();
+    let mut staff_as_mention = "".to_string();
 
-    //build message with reason and mention staff
+    for member in &online_staff {
+        staff_as_mention.push_str(&member.mention());
+        staff_as_mention.push_str(", ");
+    }
     
+    //build message with reason and mention staff
     //post message in channel
+    let _ = channel.say(&ctx, &format!("{} \n {} has request staff in {} for {}.", staff_as_mention, msg.author.mention(), msg.channel_id.mention(), &reason));
     
     //inform requester that # staff were notified.
-
+    let _ = msg.reply(&ctx, &format!("Mentioned {} staff.", online_staff.len()));
 
     Ok(())
 }
