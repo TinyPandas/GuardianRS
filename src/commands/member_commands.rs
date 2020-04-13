@@ -1,10 +1,10 @@
+use crate::util::*;
+
 use indoc::indoc;
 use serenity::client::bridge::gateway::ShardId;
 use serenity::framework::standard::{macros::command, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
-use crate::lib::ShardManagerContainer;
-use crate::util::*;
 
 #[command]
 fn ping(ctx: &mut Context, msg: &Message) -> CommandResult {

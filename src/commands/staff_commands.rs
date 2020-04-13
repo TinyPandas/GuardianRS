@@ -1,4 +1,5 @@
-use crate::ShardManagerContainer;
+use crate::util::ShardManagerContainer;
+
 use serenity::framework::standard::{macros::command, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
