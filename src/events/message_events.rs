@@ -1,9 +1,11 @@
 use crate::util::*;
+use crate::database::*;
 
+use bson::*;
 use serenity::{
     model::{
         channel::{Attachment, ReactionType, Message},
-        id::{ChannelId, EmojiId, MessageId},
+        id::{ChannelId, EmojiId, MessageId, UserId},
     },
     prelude::*,
 };
@@ -21,6 +23,16 @@ fn add_reaction(ctx: &Context, msg: &Message, is_animated: bool, emoji_id: u64, 
 
 pub fn message_received(ctx: Context, msg: Message) {
     let name: String = msg.channel_id.name(&ctx).unwrap();
+
+    let doc = create_document_chat_log(msg.id, &msg.author.id.to_string(), msg.channel_id, &msg.content);
+    let col = get_collection("Shared", "ChatLogs");
+    match add_document(col, doc) {
+        Ok(_res) => {
+            println!("Successfully logged chat item.");
+        }, Err(why) => {
+            println!("{:?}", why);
+        }
+    }
 
     match name.as_str() {
         "showcase" => {
@@ -49,25 +61,50 @@ pub fn message_received(ctx: Context, msg: Message) {
 
 pub fn message_deleted(ctx: &Context, channel_id: ChannelId, msg_id: MessageId) {
     //TODO Link with DB to get old content.
+    let logs = get_collection("Shared", "ChatLogs");
+    let del_col = get_collection("Shared", "DeletedLogs");
 
-    //let msg_obj = get_message_from_channel_by_id(&ctx, channel_id, msg_id);
-    //if msg_obj.is_none() { return }
-    //let msg_obj = msg_obj.unwrap();
+    let message_info = get_document_from_collection(logs, doc! { "messageID": msg_id.to_string() });
+    if message_info.is_none() {
+        //error here later.
+    };
+    let message_info = message_info.unwrap();
+    let author_field = match message_info.get_str("authorID") {
+        Ok(author_id) => {
+            author_id
+        }, Err(_why) => {
+            "Failed to gather authorID"
+        }
+    };
+    let content_field = match message_info.get_str("current") {
+        Ok(content) => {
+            content
+        }, Err(_why) => {
+            "Failed to get content."
+        }
+    };
 
-    //let author = &msg_obj.author.name;
-    //let content = &msg_obj.content;
+    let name: String = channel_id.name(&ctx).unwrap();
 
-    //let name: String = channel_id.name(&ctx).unwrap();
+    let guild = get_guild_from_channel_id(&ctx, channel_id);
+    if guild.is_none() { 
+        println!("Guild is none");
+        return 
+    }
+    let guild = guild.unwrap();
+    
+    let chat_log = get_channel_from_guild_by_name(&ctx, guild, String::from("chat-log"));
+    if chat_log.is_none() { 
+        println!("Channel is none");
+        return 
+    }
+    let chat_log = chat_log.unwrap();
 
-    //let guild = get_guild_from_message(&msg_obj);
-    //if guild.is_none() { return }
-    //let guild = guild.unwrap();
+    let del_doc = create_document_chat_delete(msg_id, author_field, content_field);
 
-    //let chat_log = get_channel_from_guild_by_name(&ctx, guild, String::from("chat-log"));
-    //if chat_log.is_none() { return }
-    //let chat_log = chat_log.unwrap();
+    let _ = add_document(del_col, del_doc);
 
-    //let _ = chat_log.say(&ctx, &format!("{} deleted message in {} with content `{}`.", author, name, content));
+    let _ = chat_log.say(&ctx, &format!("<@{}> deleted message in {} with content `{}`.", author_field, name, content_field));
 }
 
 pub fn message_edited(ctx: Context, old_cont: Option<Message>, new_cont: Option<Message>) {

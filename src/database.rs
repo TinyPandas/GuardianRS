@@ -8,8 +8,14 @@ use mongodb::{
     }
 };
 
+use serenity:: {
+    model::id::{
+        UserId, MessageId, ChannelId
+    }
+};
+
 use once_cell::sync::OnceCell;
-use bson::Document;
+use bson::*;
 pub struct DatabaseMod;
 
 static MONGO: OnceCell<Client> = OnceCell::new();
@@ -63,6 +69,37 @@ pub fn get_collection(db_name: &str, col_name: &str) -> Collection {
     db.collection(col_name)
 }
 
+pub fn get_document_from_collection(col: Collection, filter: Document) -> Option<Document> {
+    match col.find_one(filter, None) {
+        Ok(opt_doc) => {
+            opt_doc
+        }, Err(_why) => {
+            None
+        }
+    }
+}
+
 pub fn add_document(col: Collection, doc: Document) -> Result<InsertOneResult, Error> {
+    println!("Adding document to {}", col.name());
     col.insert_one(doc, None)
+}
+
+pub fn create_document_chat_delete(msg_id: MessageId, u_id: &str, content: &str) -> Document {
+    doc! {
+        "messageID": msg_id.to_string(),
+        "authorID": u_id,
+        "before": content
+    }
+}
+
+pub fn create_document_chat_log(msg_id: MessageId, u_id: &str, c_id: ChannelId, content: &str) -> Document {
+    doc! {
+        "messageID": msg_id.to_string(),
+        "authorID": u_id,
+        "channelID": c_id.to_string(),
+        "original": content,
+        "current": content,
+        "edited": false,
+        "deleted": false
+    }
 }

@@ -1,8 +1,9 @@
 use serenity::{
+    builder::CreateEmbed,
     client::bridge::gateway::ShardManager,
     model::{
         id::{GuildId, ChannelId, MessageId, UserId},
-        channel::Message,
+        channel::{Message},
         guild::Member,
         user::OnlineStatus,
     },
@@ -116,4 +117,43 @@ pub fn get_member_online_status(ctx: &Context, guid: GuildId, user_id: UserId) -
     };
 
     return None;
+}
+
+pub fn get_guild_from_channel_id(ctx: &Context, cid: ChannelId) -> Option<GuildId> {
+    println!("Attempting to get guild from channel {}", cid.to_string());
+
+    let channel = match cid.to_channel(ctx) {
+        Ok(channel) => {
+            println!("A");
+            channel
+        }, Err(why) => {
+            println!("{:?}", why);
+            return None
+        }
+    };
+
+    let _ = match channel.guild() {
+        Some(guild_lock) => {
+            println!("B");
+            return Some(guild_lock.read().guild_id)
+        }, None => {
+            println!("Failed part2");
+            return None
+        }
+    };
+}
+
+pub fn create_msg_embed(u_id: &str, e: &mut CreateEmbed) {
+    e.author(|a| {
+        a.name(u_id);
+
+        a
+    });
+    e.title("Test title");
+    e.description("Test Description");
+    e.fields(vec![
+        ("Field 1", "Value 1", true),
+        ("Field 2", "Value 2", true),
+        ("Field 3", "Value 3", false)
+    ]);
 }
