@@ -1,7 +1,8 @@
-mod events;
-
-pub mod commands;
 pub mod util;
+pub mod commands;
+pub mod handler;
+pub mod events;
+pub mod database;
 
 use log::error;
 use serenity::{
@@ -12,7 +13,7 @@ use std::{collections::HashSet, env, sync::Arc};
 
 use commands::command_util::*;
 use util::ShardManagerContainer;
-use events::*;
+use handler::*;
 
 fn main() {
     // Attempts to load data from .env file

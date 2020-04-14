@@ -1,7 +1,7 @@
 use serenity::{
     client::bridge::gateway::ShardManager,
     model::{
-        id::{GuildId, ChannelId, UserId},
+        id::{GuildId, ChannelId, MessageId, UserId},
         channel::Message,
         guild::Member,
         user::OnlineStatus,
@@ -29,7 +29,17 @@ pub fn get_guild_from_message(msg: &Message) -> Option<GuildId> {
     }
 }
 
-pub fn get_channel_from_guild_by_name(ctx: &mut Context, guid: GuildId, channel_name: String) -> Option<ChannelId> {
+pub fn get_message_from_channel_by_id(ctx: &Context, cid: ChannelId, mid: MessageId) -> Option<Message> {
+    match cid.message(&ctx, mid) {
+        Ok(message) => {
+            Some(message)
+        }, Err(_why) => {
+            None
+        }
+    }
+}
+
+pub fn get_channel_from_guild_by_name(ctx: &Context, guid: GuildId, channel_name: String) -> Option<ChannelId> {
     match guid.channels(&ctx) {
         Ok(channels) => {
             channels.iter().find(|(_, chan)| chan.name == channel_name).map(|(id, _)| *id)
