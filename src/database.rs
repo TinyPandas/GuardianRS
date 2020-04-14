@@ -1,6 +1,6 @@
 use mongodb::{error::Error, results::InsertOneResult, Client, Collection, Database};
 
-use serenity::model::id::{ChannelId, MessageId, UserId};
+use serenity::model::id::{ChannelId, MessageId};
 
 use bson::*;
 use once_cell::sync::OnceCell;
@@ -31,7 +31,7 @@ pub fn db_setup() {
         println!("No DB connection");
     }
 
-    let _ = MONGO.set(client.unwrap()).unwrap();
+    MONGO.set(client.unwrap()).unwrap();
 }
 
 pub fn check_db() {
@@ -39,7 +39,7 @@ pub fn check_db() {
 
     let db = c.database("shared");
 
-    for cols in db.list_collection_names(None) {
+    if let Ok(cols) = db.list_collection_names(None) {
         for col_name in cols {
             println!("Collection: {}", col_name);
         }

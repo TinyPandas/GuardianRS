@@ -1,7 +1,6 @@
 use crate::database::*;
 use crate::events::message_events::*;
 
-use bson::*;
 use log::info;
 use serenity::{
     model::{

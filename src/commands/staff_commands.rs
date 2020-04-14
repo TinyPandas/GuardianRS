@@ -1,4 +1,3 @@
-use crate::database::*;
 use crate::util::*;
 
 use serenity::framework::standard::{macros::command, CommandResult};
