@@ -1,18 +1,12 @@
-use crate::commands::{
-    member_commands::*,
-    staff_commands::*
-};
+use crate::commands::{member_commands::*, staff_commands::*};
 
 use serenity::{
     framework::standard::{
-        Args, CommandGroup, CommandResult, HelpOptions,
         help_commands,
-        macros::{group, help}
+        macros::{group, help},
+        Args, CommandGroup, CommandResult, HelpOptions,
     },
-    model::{
-        channel::Message,
-        id::UserId,
-    },
+    model::{channel::Message, id::UserId},
     prelude::*,
 };
 use std::collections::HashSet;
@@ -23,7 +17,7 @@ struct General;
 
 #[group]
 #[allowed_roles("staff")]
-#[commands(shutdown)]
+#[commands(shutdown, test_embed)]
 struct Admin;
 
 // The framework provides two built-in help commands for you to use.

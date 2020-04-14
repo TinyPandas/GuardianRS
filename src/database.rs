@@ -1,21 +1,9 @@
-use mongodb::{
-    Client, Database, Collection,
-    results::{
-        InsertOneResult
-    },
-    error::{
-        Error
-    }
-};
+use mongodb::{error::Error, results::InsertOneResult, Client, Collection, Database};
 
-use serenity:: {
-    model::id::{
-        UserId, MessageId, ChannelId
-    }
-};
+use serenity::model::id::{ChannelId, MessageId, UserId};
 
-use once_cell::sync::OnceCell;
 use bson::*;
+use once_cell::sync::OnceCell;
 pub struct DatabaseMod;
 
 static MONGO: OnceCell<Client> = OnceCell::new();
@@ -31,7 +19,8 @@ pub fn db_setup() {
         Ok(client) => {
             println!("Connected to DB.");
             Some(client)
-        }, Err(why) => {
+        }
+        Err(why) => {
             println!("Failed to setup DB. {:?}", why);
             None
         }
@@ -71,11 +60,8 @@ pub fn get_collection(db_name: &str, col_name: &str) -> Collection {
 
 pub fn get_document_from_collection(col: Collection, filter: Document) -> Option<Document> {
     match col.find_one(filter, None) {
-        Ok(opt_doc) => {
-            opt_doc
-        }, Err(_why) => {
-            None
-        }
+        Ok(opt_doc) => opt_doc,
+        Err(_why) => None,
     }
 }
 
@@ -92,7 +78,12 @@ pub fn create_document_chat_delete(msg_id: MessageId, u_id: &str, content: &str)
     }
 }
 
-pub fn create_document_chat_log(msg_id: MessageId, u_id: &str, c_id: ChannelId, content: &str) -> Document {
+pub fn create_document_chat_log(
+    msg_id: MessageId,
+    u_id: &str,
+    c_id: ChannelId,
+    content: &str,
+) -> Document {
     doc! {
         "messageID": msg_id.to_string(),
         "authorID": u_id,

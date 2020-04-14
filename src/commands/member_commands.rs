@@ -58,7 +58,10 @@ fn info(ctx: &mut Context, msg: &Message) -> CommandResult {
 
 #[command]
 fn invite(ctx: &mut Context, msg: &Message) -> CommandResult {
-    let _ = msg.reply(&ctx.http, "Invite your friends using: https://discord.gg/WHTAYrK");
+    let _ = msg.reply(
+        &ctx.http,
+        "Invite your friends using: https://discord.gg/WHTAYrK",
+    );
 
     Ok(())
 }
@@ -72,7 +75,7 @@ fn nocode(ctx: &mut Context, msg: &Message) -> CommandResult {
 
 #[command]
 fn status(ctx: &mut Context, msg: &Message) -> CommandResult {
-    let guild = get_guild_from_message(&msg);
+    let guild = &msg.guild_id;
     if guild.is_none() {
         let _ = msg.reply(&ctx, "Failed to get your status.");
         return Ok(());
@@ -86,7 +89,10 @@ fn status(ctx: &mut Context, msg: &Message) -> CommandResult {
     }
     let indiv_status = indiv_status.unwrap();
 
-    let _ = msg.reply(&ctx, &format!("Your online status is: {}", indiv_status.name()));
+    let _ = msg.reply(
+        &ctx,
+        &format!("Your online status is: {}", indiv_status.name()),
+    );
 
     Ok(())
 }
@@ -95,9 +101,9 @@ fn status(ctx: &mut Context, msg: &Message) -> CommandResult {
 fn request(ctx: &mut Context, msg: &Message) -> CommandResult {
     //get reason for request
     let reason = &msg.content[9..];
-    
+
     //get guild
-    let guild = get_guild_from_message(&msg);
+    let guild = &msg.guild_id;
     if guild.is_none() {
         let _ = msg.reply(&ctx, "Failed to mention staff.");
         return Ok(());
@@ -124,11 +130,20 @@ fn request(ctx: &mut Context, msg: &Message) -> CommandResult {
         staff_as_mention.push_str(&member.mention());
         staff_as_mention.push_str(", ");
     }
-    
+
     //build message with reason and mention staff
     //post message in channel
-    let _ = channel.say(&ctx, &format!("{} \n {} has request staff in {} for {}.", staff_as_mention, msg.author.mention(), msg.channel_id.mention(), &reason));
-    
+    let _ = channel.say(
+        &ctx,
+        &format!(
+            "{} \n {} has request staff in {} for {}.",
+            staff_as_mention,
+            msg.author.mention(),
+            msg.channel_id.mention(),
+            &reason
+        ),
+    );
+
     //inform requester that # staff were notified.
     let _ = msg.reply(&ctx, &format!("Mentioned {} staff.", online_staff.len()));
 

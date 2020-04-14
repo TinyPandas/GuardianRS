@@ -1,4 +1,5 @@
-use crate::util::ShardManagerContainer;
+use crate::database::*;
+use crate::util::*;
 
 use serenity::framework::standard::{macros::command, CommandResult};
 use serenity::model::prelude::*;
@@ -21,3 +22,30 @@ fn shutdown(ctx: &mut Context, msg: &Message) -> CommandResult {
 
     Ok(())
 }
+
+#[command]
+#[allowed_roles("staff")]
+fn test_embed(ctx: &mut Context, msg: &Message) -> CommandResult {
+    let _ = msg.channel_id.send_message(&ctx, |m| {
+        m.content("Test embed");
+        m.embed(|e| {
+            create_msg_embed(&msg.author.name, e);
+            e
+        });
+
+        m
+    });
+
+    Ok(())
+}
+
+fn ban() {}
+fn filter() {}
+fn history() {}
+fn kick() {}
+fn mute() {}
+fn offtopic() {}
+fn removemute() {}
+fn rules() {}
+fn unmute() {}
+fn warn() {}

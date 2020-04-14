@@ -1,19 +1,16 @@
-pub mod util;
 pub mod commands;
-pub mod handler;
-pub mod events;
 pub mod database;
+pub mod events;
+pub mod handler;
+pub mod util;
 
 use log::error;
-use serenity::{
-    framework::standard::StandardFramework,
-    prelude::*,
-};
+use serenity::{framework::standard::StandardFramework, prelude::*};
 use std::{collections::HashSet, env, sync::Arc};
 
 use commands::command_util::*;
-use util::ShardManagerContainer;
 use handler::*;
+use util::ShardManagerContainer;
 
 fn main() {
     // Attempts to load data from .env file
@@ -45,7 +42,7 @@ fn main() {
             .configure(|c| c.owners(owners).prefix(";"))
             .help(&MY_HELP)
             .group(&GENERAL_GROUP)
-            .group(&ADMIN_GROUP)
+            .group(&ADMIN_GROUP),
     );
 
     if let Err(why) = client.start() {
