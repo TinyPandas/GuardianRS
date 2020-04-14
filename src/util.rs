@@ -48,7 +48,7 @@ pub fn get_channel_from_guild_by_name(
     }
 }
 
-pub fn member_has_role(ctx: &Context, member: &Member, role_name: &String) -> bool {
+pub fn member_has_role(ctx: &Context, member: &Member, role_name: &str) -> bool {
     match member.roles(&ctx) {
         Some(roles) => {
             for role in roles {
@@ -56,11 +56,9 @@ pub fn member_has_role(ctx: &Context, member: &Member, role_name: &String) -> bo
                     return true;
                 }
             }
-            return false;
+            false
         }
-        None => {
-            return false;
-        }
+        None => false,
     }
 }
 
@@ -72,13 +70,9 @@ pub fn get_members_by_role(ctx: &Context, guid: GuildId, role_name: String) -> O
             Ok(member) => {
                 if member_has_role(&ctx, &member, &role_name) {
                     let status = get_member_online_status(&ctx, guid, member.user_id());
-                    if !status.is_none() {
-                        let status = status.unwrap();
-                        match status.name() {
-                            "online" => {
-                                members.insert(members.len(), member.clone());
-                            }
-                            _ => {}
+                    if let Some(status) = status {
+                        if status.name() == "online" {
+                            members.insert(members.len(), member.clone());
                         }
                     }
                 }
@@ -90,7 +84,7 @@ pub fn get_members_by_role(ctx: &Context, guid: GuildId, role_name: String) -> O
         }
     }
 
-    return Some(members);
+    Some(members)
 }
 
 pub fn get_member_online_status(
@@ -118,7 +112,7 @@ pub fn get_member_online_status(
         }
     };
 
-    return None;
+    None
 }
 
 pub fn get_guild_from_channel_id(ctx: &Context, cid: ChannelId) -> Option<GuildId> {
@@ -135,16 +129,16 @@ pub fn get_guild_from_channel_id(ctx: &Context, cid: ChannelId) -> Option<GuildI
         }
     };
 
-    let _ = match channel.guild() {
+    match channel.guild() {
         Some(guild_lock) => {
             println!("B");
-            return Some(guild_lock.read().guild_id);
+            Some(guild_lock.read().guild_id)
         }
         None => {
             println!("Failed part2");
-            return None;
+            None
         }
-    };
+    }
 }
 
 pub fn create_msg_embed(u_id: &str, e: &mut CreateEmbed) {

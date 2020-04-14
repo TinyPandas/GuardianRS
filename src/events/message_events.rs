@@ -5,7 +5,7 @@ use bson::*;
 use serenity::{
     model::{
         channel::{Attachment, Message, ReactionType},
-        id::{ChannelId, EmojiId, MessageId, UserId},
+        id::{ChannelId, EmojiId, MessageId},
     },
     prelude::*,
 };
@@ -53,7 +53,7 @@ pub fn message_received(ctx: Context, msg: Message) {
 
             let items: Vec<Attachment> = msg.attachments.clone();
 
-            if items.len() == 0 {
+            if items.is_empty() {
                 match msg.delete(ctx.http) {
                     Ok(()) => {}
                     Err(why) => {
@@ -64,8 +64,8 @@ pub fn message_received(ctx: Context, msg: Message) {
         }
         "suggestion-box" => {
             if msg.content.starts_with("--sug--") {
-                add_reaction(&ctx, &msg, false, 693278870681419867, "upvote");
-                add_reaction(&ctx, &msg, false, 693278893121208391, "downvote");
+                add_reaction(&ctx, &msg, false, 693_278_870_681_419_867, "upvote");
+                add_reaction(&ctx, &msg, false, 693_278_893_121_208_391, "downvote");
             }
         }
         _ => {}
